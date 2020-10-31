@@ -40,10 +40,6 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     super.dispose();
   }
 
-  _printLatestValue() {
-    print("Second text field: ${_textEditingController.text}");
-  }
-
   _scrollListener() {
     // print(
     //     "_controller.offset => ${_controller.offset} = ${_controller.position.maxScrollExtent}");
@@ -113,9 +109,15 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
                           textInputAction: TextInputAction.done,
                           controller: _textEditingController,
                           decoration: new InputDecoration(
-                            // hintText: "Enter Something",
+                            hintText: "Enter Something",
                             hintStyle: TextStyle(
-                              color: Colors.black,
+                              color: Colors.black26,
+                              fontSize: 20,
+                            ),
+                            helperText: "Add Reminder",
+                            helperStyle: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 16,
                             ),
                             border: InputBorder.none,
                             contentPadding:
