@@ -52,7 +52,7 @@ class _SelectDateAndTimeScreenState extends State<SelectDateAndTimeScreen> {
             child: CupertinoDatePicker(
               initialDateTime: _dateTime,
               onDateTimeChanged: (dataTime) {
-                print(dataTime);
+                // print(dataTime);
                 _dateTime = dataTime;
               },
             ),

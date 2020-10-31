@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/screens/models/index.dart';
-
+import 'package:todo_app/models/index.dart';
 import 'index.dart';
 
 class PersonalListScreen extends StatefulWidget {
+  static const String routeName = "/personalList_screen";
+
   @override
   _PersonalListScreenState createState() => _PersonalListScreenState();
 }
@@ -86,6 +87,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
           title: Text("Personal List"),
           elevation: 0.0,
         ),
+        drawer: Drawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
