@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/screens/home_screen/index.dart';
 import 'package:todo_app/router.dart' as router;
+import 'package:todo_app/screens/index.dart';
 
 class ConfigScreen extends StatelessWidget {
   @override
@@ -14,9 +14,9 @@ class ConfigScreen extends StatelessWidget {
   }
 
   createContent() {
-    // return OnBoardingScreen();
+    return OnBoardingScreen();
     // return PersonalListScreen();
     // return PersonalListSample01Screen();
-    return TodoListScreen();
+    // return TodoListScreen();
   }
 }

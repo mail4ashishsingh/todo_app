@@ -108,9 +108,9 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
           backgroundColor: Colors.black,
           title: Text("Personal List"),
           elevation: 0.0,
+          leading: Offstage(),
         ),
         // drawer: Drawer(),
-        drawer: null,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
