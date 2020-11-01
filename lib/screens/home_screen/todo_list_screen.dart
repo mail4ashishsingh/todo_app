@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/models/index.dart';
-import 'new_todo.dart';
+import 'widgets/new_todo.dart';
 
 class TodoListScreen extends StatefulWidget {
   @override
@@ -90,53 +90,6 @@ class _TodoListScreenState extends State<TodoListScreen>
       },
     );
   }
-
-  Widget buildListViewTest() {
-    return ReorderableListView(
-      children: List.generate(items.length, (index) {
-        return ListTile(
-          key: UniqueKey(),
-          title: Text(
-            items[index].title,
-            style: TextStyle(
-              color: Colors.red,
-              fontSize: 18.0,
-            ),
-          ),
-        );
-      }),
-      onReorder: (int oldIndex, int newIndex) {
-        setState(() {
-          if (newIndex > oldIndex) {
-            newIndex -= 1;
-          }
-          final Todo newString = items.removeAt(oldIndex);
-          items.insert(newIndex, newString);
-        });
-      },
-    );
-  }
-
-  // Widget buildListView() {
-  //   return AnimatedList(
-  //     key: animatedListKey,
-  //     initialItemCount: items.length,
-  //     itemBuilder: (BuildContext context, int index, animation) {
-  //       // print("items[index] = ${items[index].title}");
-  //       // print("items[index] = ${items[index].completed}");
-  //
-  //       items.sort(
-  //           (a, b) => a.completed.toString().compareTo(b.completed.toString()));
-  //
-  //       return SizeTransition(
-  //         sizeFactor: animation,
-  //         child: items[index].completed
-  //             ? buildCompletedListTile(items[index], index)
-  //             : buildItem(items[index], index),
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget buildItem(Todo item, int index) {
     return Dismissible(

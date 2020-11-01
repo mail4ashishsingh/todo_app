@@ -50,7 +50,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
         !_controller.position.outOfRange) {
       setState(() {
         // message = "reach the bottom";
-        showContainer = false;
+        if (_textEditingController.text.isEmpty) showContainer = false;
       });
     }
     if (_controller.offset <= _controller.position.minScrollExtent &&
