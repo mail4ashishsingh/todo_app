@@ -5,7 +5,8 @@ import 'router_name.dart';
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
     case PERSONAL_LIST_SCREEN:
-      return MaterialPageRoute(builder: (context) => PersonalListScreen());
+      return MaterialPageRoute(
+          builder: (context) => PersonalListSQFLiteScreen());
       break;
 
     default:

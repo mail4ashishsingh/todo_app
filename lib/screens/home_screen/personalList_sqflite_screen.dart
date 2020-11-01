@@ -4,16 +4,16 @@ import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/models/index.dart';
 import 'package:todo_app/utility/database_helper.dart';
 import 'index.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PersonalListScreen extends StatefulWidget {
+class PersonalListSQFLiteScreen extends StatefulWidget {
   static const String routeName = "/personalList_screen";
 
   @override
-  _PersonalListScreenState createState() => _PersonalListScreenState();
+  _PersonalListSQFLiteScreenState createState() =>
+      _PersonalListSQFLiteScreenState();
 }
 
-class _PersonalListScreenState extends State<PersonalListScreen> {
+class _PersonalListSQFLiteScreenState extends State<PersonalListSQFLiteScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController titleTextController = new TextEditingController();
 
@@ -24,19 +24,6 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
   ScrollController _controller;
   String message;
   bool showContainer;
-
-  createTodo() {
-    DocumentReference documentReference = FirebaseFirestore.instance
-        .collection("todo-table")
-        .doc(titleTextController.text);
-
-    // Map
-    Map<String, String> todo = {"title": titleTextController.text};
-
-    documentReference.set(todo).whenComplete(() {
-      print("${titleTextController.text} created");
-    });
-  }
 
   @override
   void initState() {
@@ -125,13 +112,102 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
           leading: Offstage(),
         ),
         // drawer: Drawer(),
-        body: StreamBuilder(
-          stream:
-              FirebaseFirestore.instance.collection("todo-table").snapshots(),
-          builder: (context, snapshots) {
-            print(snapshots);
-            return _buildScreenWidget();
-          },
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            (showContainer)
+                ? Container(
+                    padding: EdgeInsets.all(8.0),
+                    height: 80.0,
+                    decoration: BoxDecoration(
+                        gradient: new LinearGradient(
+                      colors: [
+                        Colors.deepOrangeAccent,
+                        Colors.grey[200],
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topRight,
+                      stops: [0.3, 1],
+                    )),
+                    child: Center(
+                      child: TextField(
+                          autofocus: true,
+                          autocorrect: false,
+                          textInputAction: TextInputAction.done,
+                          controller: titleTextController,
+                          decoration: new InputDecoration(
+                            hintText: "Enter Something",
+                            hintStyle: TextStyle(
+                              color: Colors.black26,
+                              fontSize: 20,
+                            ),
+                            helperText: "Add Reminder",
+                            helperStyle: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600),
+                            border: InputBorder.none,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                          ),
+                          onSubmitted: (value) {
+                            if (value != "") {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SelectDateAndTimeScreen();
+                                  }).then((dateTime) {
+                                if (dateTime != null) {
+                                  // final DateTime now = dateTime;
+                                  final DateFormat formatter =
+                                      DateFormat('dd-MM-yyyy At hh:mm a');
+                                  final String tempDate =
+                                      formatter.format(DateTime.now());
+
+                                  Note note = new Note(
+                                      value.toString(), tempDate.toString(), 1);
+
+                                  _save(note);
+                                  titleTextController.clear();
+                                }
+                              });
+                            }
+                          },
+                          cursorColor: Colors.white,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w800)),
+                    ),
+                  )
+                : Offstage(),
+            (noteList.length > 0)
+                ? Expanded(
+                    child: Container(
+                      color: Colors.black,
+                      child: ReorderableListView(
+                        onReorder: (int index, int targetPosition) {
+                          noteList[index].priority = 2;
+                          _update(noteList[index]);
+                        },
+                        scrollDirection: Axis.vertical,
+                        scrollController: _controller,
+                        children: List.generate(
+                          noteList.length,
+                          (index) {
+                            Note todo = noteList[index];
+                            Key key = UniqueKey();
+                            return todo.priority == 1
+                                ? buildItem(todo, index, key)
+                                : buildCompletedListTile(todo, index, key);
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : emptyList(),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(
@@ -146,109 +222,6 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildScreenWidget() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        (showContainer)
-            ? Container(
-                padding: EdgeInsets.all(8.0),
-                height: 80.0,
-                decoration: BoxDecoration(
-                    gradient: new LinearGradient(
-                  colors: [
-                    Colors.deepOrangeAccent,
-                    Colors.grey[200],
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topRight,
-                  stops: [0.3, 1],
-                )),
-                child: Center(
-                  child: TextField(
-                      autofocus: true,
-                      autocorrect: false,
-                      textInputAction: TextInputAction.done,
-                      controller: titleTextController,
-                      decoration: new InputDecoration(
-                        hintText: "Enter Something",
-                        hintStyle: TextStyle(
-                          color: Colors.black26,
-                          fontSize: 20,
-                        ),
-                        helperText: "Add Reminder",
-                        helperStyle: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 20.0),
-                      ),
-                      onSubmitted: (value) {
-                        if (value != "") {
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return SelectDateAndTimeScreen();
-                              }).then((dateTime) {
-                            if (dateTime != null) {
-                              // final DateTime now = dateTime;
-                              final DateFormat formatter =
-                                  DateFormat('dd-MM-yyyy At hh:mm a');
-                              final String tempDate =
-                                  formatter.format(DateTime.now());
-
-                              Note note = new Note(
-                                  value.toString(), tempDate.toString(), 1);
-
-                              // _save(note);
-
-                              createTodo();
-
-                              titleTextController.clear();
-                            }
-                          });
-                        }
-                      },
-                      cursorColor: Colors.white,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.w800)),
-                ),
-              )
-            : Offstage(),
-        (noteList.length > 0)
-            ? Expanded(
-                child: Container(
-                  color: Colors.black,
-                  child: ReorderableListView(
-                    onReorder: (int index, int targetPosition) {
-                      noteList[index].priority = 2;
-                      _update(noteList[index]);
-                    },
-                    scrollDirection: Axis.vertical,
-                    scrollController: _controller,
-                    children: List.generate(
-                      noteList.length,
-                      (index) {
-                        Note todo = noteList[index];
-                        Key key = UniqueKey();
-                        return todo.priority == 1
-                            ? buildItem(todo, index, key)
-                            : buildCompletedListTile(todo, index, key);
-                      },
-                    ),
-                  ),
-                ),
-              )
-            : emptyList(),
-      ],
     );
   }
 

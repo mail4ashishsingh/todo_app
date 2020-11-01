@@ -3,16 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:todo_app/models/index.dart';
 import 'index.dart';
 
-class PersonalListSample01Screen extends StatefulWidget {
+class PersonalList01Screen extends StatefulWidget {
   static const String routeName = "/personalList_screen";
 
   @override
-  _PersonalListSample01ScreenState createState() =>
-      _PersonalListSample01ScreenState();
+  _PersonalList01ScreenState createState() => _PersonalList01ScreenState();
 }
 
-class _PersonalListSample01ScreenState
-    extends State<PersonalListSample01Screen> {
+class _PersonalList01ScreenState extends State<PersonalList01Screen> {
   TextEditingController _textEditingController = new TextEditingController();
   List<Todo> items = new List<Todo>();
 
