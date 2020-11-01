@@ -71,8 +71,8 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     dbFuture.then((database) {
       Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
       noteListFuture.then((noteList) {
-        noteList.sort(
-            (a, b) => a.priority.toString().compareTo(b.priority.toString()));
+        // noteList.sort(
+        //     (a, b) => a.priority.toString().compareTo(b.priority.toString()));
 
         if (noteList.length == 0) showContainer = true;
         setState(() {

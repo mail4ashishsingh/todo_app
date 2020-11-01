@@ -52,7 +52,7 @@ class DatabaseHelper {
     Database db = await this.database;
 
     // var result = await db.rawQuery('SELECT * FROM $noteTable');
-    var result = await db.query(noteTable);
+    var result = await db.query(noteTable, orderBy: '$colPriority ASC');
 
     return result;
   }
