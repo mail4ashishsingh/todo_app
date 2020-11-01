@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/models/index.dart';
-import 'package:todo_app/utility/database_helper.dart';
 import 'index.dart';
 
-class PersonalListScreen extends StatefulWidget {
+class PersonalListSample01Screen extends StatefulWidget {
   static const String routeName = "/personalList_screen";
 
   @override
-  _PersonalListScreenState createState() => _PersonalListScreenState();
+  _PersonalListSample01ScreenState createState() =>
+      _PersonalListSample01ScreenState();
 }
 
-class _PersonalListScreenState extends State<PersonalListScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  TextEditingController titleTextController = new TextEditingController();
-
-  DatabaseHelper databaseHelper = DatabaseHelper();
-  List<Note> noteList;
-  int count = 0;
+class _PersonalListSample01ScreenState
+    extends State<PersonalListSample01Screen> {
+  TextEditingController _textEditingController = new TextEditingController();
+  List<Todo> items = new List<Todo>();
 
   ScrollController _controller;
   String message;
@@ -27,10 +23,12 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
   @override
   void initState() {
     message = "";
-    showContainer = false;
+    showContainer = true;
 
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
+
+    // _textEditingController.addListener(_printLatestValue);
 
     super.initState();
   }
@@ -40,7 +38,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     _controller.removeListener(_scrollListener);
     _controller.dispose();
 
-    titleTextController.dispose();
+    _textEditingController.dispose();
     super.dispose();
   }
 
@@ -54,7 +52,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
         !_controller.position.outOfRange) {
       setState(() {
         // message = "reach the bottom";
-        if (titleTextController.text.isEmpty) showContainer = false;
+        if (_textEditingController.text.isEmpty) showContainer = false;
       });
     }
     if (_controller.offset <= _controller.position.minScrollExtent &&
@@ -66,51 +64,28 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     }
   }
 
-  void updateListView() {
-    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
-    dbFuture.then((database) {
-      Future<List<Note>> noteListFuture = databaseHelper.getNoteList();
-      noteListFuture.then((noteList) {
-        noteList.sort(
-            (a, b) => a.priority.toString().compareTo(b.priority.toString()));
-
-        if (noteList.length == 0) showContainer = true;
-        setState(() {
-          this.noteList = noteList;
-          this.count = noteList.length;
-        });
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (noteList == null) {
-      noteList = List<Note>();
-      updateListView();
-    }
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
-        // print("titleTextController.text => ${titleTextController.text}");
-        if (titleTextController.text.isEmpty && noteList.length > 0) {
+        // print("_textEditingController.text => ${_textEditingController.text}");
+
+        if (_textEditingController.text.isEmpty && items.length > 0) {
           showContainer = false;
           setState(() {
-            // titleTextController.clear();
+            // _textEditingController.clear();
           });
         }
       },
       child: Scaffold(
-        key: _scaffoldKey,
         backgroundColor: Colors.black,
         appBar: AppBar(
           backgroundColor: Colors.black,
           title: Text("Personal List"),
           elevation: 0.0,
         ),
-        // drawer: Drawer(),
-        drawer: null,
+        drawer: Drawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +109,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
                           autofocus: true,
                           autocorrect: false,
                           textInputAction: TextInputAction.done,
-                          controller: titleTextController,
+                          controller: _textEditingController,
                           decoration: new InputDecoration(
                             hintText: "Enter Something",
                             hintStyle: TextStyle(
@@ -143,32 +118,34 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
                             ),
                             helperText: "Add Reminder",
                             helperStyle: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600),
+                              color: Colors.white38,
+                              fontSize: 16,
+                            ),
                             border: InputBorder.none,
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
                           ),
                           onSubmitted: (value) {
                             if (value != "") {
+                              // addItem(Todo(title: value));
                               showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
                                     return SelectDateAndTimeScreen();
                                   }).then((dateTime) {
                                 if (dateTime != null) {
-                                  // final DateTime now = dateTime;
+                                  final DateTime now = dateTime;
                                   final DateFormat formatter =
                                       DateFormat('dd-MM-yyyy At hh:mm a');
-                                  final String tempDate =
-                                      formatter.format(DateTime.now());
-
-                                  Note note = new Note(
-                                      value.toString(), tempDate.toString(), 1);
-
-                                  _save(note);
-                                  titleTextController.clear();
+                                  final String tempDate = formatter.format(now);
+                                  // print(tempDate);
+                                  addItem(
+                                    Todo(
+                                      title: value,
+                                      date: tempDate,
+                                    ),
+                                  );
+                                  _textEditingController.clear();
                                 }
                               });
                             }
@@ -181,25 +158,25 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
                     ),
                   )
                 : Offstage(),
-            (noteList.length > 0)
+            (items.length > 0)
                 ? Expanded(
                     child: Container(
                       color: Colors.black,
                       child: ReorderableListView(
+                        // onReorder: _onReorder,
                         onReorder: (int index, int targetPosition) {
-                          noteList[index].priority = 2;
-                          _update(noteList[index]);
+                          changeItemCompleteness(items[index], index);
                         },
                         scrollDirection: Axis.vertical,
                         scrollController: _controller,
                         children: List.generate(
-                          noteList.length,
+                          items.length,
                           (index) {
-                            Note todo = noteList[index];
+                            Todo todo = items[index];
                             Key key = UniqueKey();
-                            return todo.priority == 1
-                                ? buildItem(todo, index, key)
-                                : buildCompletedListTile(todo, index, key);
+                            return todo.completed
+                                ? buildCompletedListTile(todo, index, key)
+                                : buildItem(todo, index, key);
                           },
                         ),
                       ),
@@ -224,65 +201,6 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     );
   }
 
-  void _save(Note note) async {
-    // note.date = DateFormat.yMMMd().format(DateTime.now());
-    int result = await databaseHelper.insertNote(note);
-
-    if (result != 0) {
-      // Success
-      updateListView();
-      // _showAlertDialog("Status", "Note Saved Successfully");
-      _showSnackBar("Note Saved Successfully");
-    } else {
-      // Failure
-      // _showAlertDialog("Status", "Problem Saving Note");
-      _showSnackBar("Problem Saving Note");
-    }
-  }
-
-  void _delete(Note note) async {
-    if (note.id == null) {
-      _showAlertDialog('Status', 'No Note was deleted');
-      return;
-    }
-    // Case 2: User is trying to delete the old note that already has a valid ID.
-    int result = await databaseHelper.deleteNote(note.id);
-    if (result != 0) {
-      updateListView();
-      _showSnackBar('Note Deleted Successfully');
-    } else {
-      _showSnackBar('Error occur while Deleting Note');
-    }
-  }
-
-  void _update(Note note) async {
-    if (note.id == null) {
-      _showAlertDialog('Status', 'No Note was updated');
-      return;
-    }
-    // Case 2: User is trying to update the old note that already has a valid ID.
-    int result = await databaseHelper.updateNote(note);
-    if (result != 0) {
-      updateListView();
-      _showSnackBar('Note Updated Successfully');
-    } else {
-      _showSnackBar('Error occur while Updating Note');
-    }
-  }
-
-  void _showSnackBar(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    _scaffoldKey.currentState.showSnackBar(snackBar);
-  }
-
-  void _showAlertDialog(String title, String message) {
-    AlertDialog alertDialog = AlertDialog(
-      title: Text(title),
-      content: Text(message),
-    );
-    showDialog(context: context, builder: (_) => alertDialog);
-  }
-
   Widget emptyList() {
     return Expanded(
       child: Center(
@@ -297,7 +215,7 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     );
   }
 
-  Widget buildItem(Note item, int index, key) {
+  Widget buildItem(Todo item, int index, key) {
     return Dismissible(
       key: key,
       background: slideRightBackground(),
@@ -305,16 +223,49 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
       child: buildListTile(item, index),
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
-          _delete(item);
+          // print(direction);
+          removeItemFromList(item, index);
         } else if (direction == DismissDirection.startToEnd) {
-          item.priority = 2;
-          _update(item);
+          // print(direction);
+          changeItemCompleteness(item, index);
         }
       },
     );
   }
 
-  Widget buildCompletedListTile(Note item, int index, Key key) {
+  void changeItemCompleteness(Todo item, int index) {
+    setState(() {
+      item.completed = !item.completed;
+
+      int newIndex = items.length;
+      setState(
+        () {
+          if (newIndex > index) {
+            newIndex -= 1;
+          }
+          final Todo item = items.removeAt(index);
+          items.insert(newIndex, item);
+
+          _showContainer();
+        },
+      );
+    });
+  }
+
+  _showContainer() {
+    bool _tempShowContainerFlag = false;
+    for (int i = 0; i < items.length; i++) {
+      if (items[i].completed) {
+        _tempShowContainerFlag = true;
+      } else {
+        _tempShowContainerFlag = false;
+        break;
+      }
+    }
+    showContainer = _tempShowContainerFlag;
+  }
+
+  Widget buildCompletedListTile(Todo item, int index, Key key) {
     return Container(
       key: key,
       padding: EdgeInsets.all(8.0),
@@ -325,8 +276,8 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
               item.title,
               key: key,
               style: TextStyle(
-                color: Colors.grey,
-                decoration: TextDecoration.lineThrough,
+                color: item.completed ? Colors.grey : Colors.white,
+                decoration: item.completed ? TextDecoration.lineThrough : null,
                 fontSize: 24.0,
                 fontWeight: FontWeight.w600,
               ),
@@ -336,8 +287,8 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
             item.date.toString(),
             key: Key('item-$index'),
             style: TextStyle(
-              color: Colors.grey,
-              decoration: TextDecoration.lineThrough,
+              color: item.completed ? Colors.grey : Colors.black,
+              decoration: item.completed ? TextDecoration.lineThrough : null,
               fontSize: 18.0,
               fontWeight: FontWeight.w600,
             ),
@@ -345,7 +296,53 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
     );
   }
 
-  Widget buildListTile(Note item, int index) {
+  void goToNewItemView() {
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+          builder: (context) {
+            return NewTodoView();
+          },
+          fullscreenDialog: true),
+    )
+        .then((title) {
+      if (title != null) {
+        addItem(Todo(title: title));
+      }
+    });
+  }
+
+  void addItem(Todo item) {
+    items.insert(0, item);
+    showContainer = false;
+    setState(() {});
+  }
+
+  void removeItemFromList(item, int index) {
+    items.remove(item);
+    if (items.isEmpty) {
+      showContainer = true;
+    } else {
+      _showContainer();
+    }
+    setState(() {});
+  }
+
+  // void _onReorder(int oldIndex, int newIndex) {
+  //   // print("items[oldIndex] = ${items[oldIndex]}");
+  //   changeItemCompleteness(items[oldIndex], oldIndex);
+  //   // setState(
+  //   //   () {
+  //   //     if (newIndex > oldIndex) {
+  //   //       newIndex -= 1;
+  //   //     }
+  //   //     final Todo item = items.removeAt(oldIndex);
+  //   //     items.insert(newIndex, item);
+  //   //   },
+  //   // );
+  // }
+
+  Widget buildListTile(Todo item, int index) {
     return Container(
       padding: EdgeInsets.all(8.0),
       decoration: new BoxDecoration(
@@ -361,14 +358,16 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
         ),
       ),
       child: ListTile(
+        // onTap: () => changeItemCompleteness(item, index),
+        // onLongPress: () => goToEditItemView(item),
         title: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: Text(
             item.title.toString(),
             key: Key('item-$index'),
             style: TextStyle(
-              color: Colors.black,
-              decoration: null,
+              color: item.completed ? Colors.grey : Colors.black,
+              decoration: item.completed ? TextDecoration.lineThrough : null,
               fontSize: 24.0,
               fontWeight: FontWeight.w800,
             ),
@@ -378,8 +377,8 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
           item.date.toString(),
           key: Key('item-$index'),
           style: TextStyle(
-            color: Colors.black,
-            decoration: null,
+            color: item.completed ? Colors.grey : Colors.black,
+            decoration: item.completed ? TextDecoration.lineThrough : null,
             fontSize: 18.0,
             fontWeight: FontWeight.w600,
           ),

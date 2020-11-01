@@ -1,17 +1,17 @@
 class Todo {
   String title;
-  String dateTime;
+  String date;
   bool completed;
 
   Todo({
     this.title,
-    this.dateTime,
+    this.date,
     this.completed = false,
   });
 
   Todo.fromMap(Map<String, dynamic> map)
       : title = map['title'],
-        dateTime = map['dateTime'],
+        date = map['date'],
         completed = map['completed'];
 
   updateTitle(title) {
@@ -19,13 +19,13 @@ class Todo {
   }
 
   updateSubTitle(dateTime) {
-    this.dateTime = dateTime;
+    this.date = dateTime;
   }
 
   Map toMap() {
     return {
       'title': title,
-      'dateTime': dateTime,
+      'dateTime': date,
       'completed': completed,
     };
   }
