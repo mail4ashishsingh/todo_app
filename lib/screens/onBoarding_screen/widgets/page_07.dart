@@ -89,7 +89,9 @@ class Page07Screen extends StatelessWidget {
                 ),
               ),
               FlatButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, PERSONAL_LIST_SCREEN);
+                },
                 child: Container(
                   height: MediaQuery.of(context).size.width * 0.13,
                   width: MediaQuery.of(context).size.width * 0.38,
