@@ -197,11 +197,10 @@ class _PersonalListScreenState extends State<PersonalListScreen> {
                                 return SelectDateAndTimeScreen();
                               }).then((dateTime) {
                             if (dateTime != null) {
-                              // final DateTime now = dateTime;
+                              final DateTime now = dateTime;
                               final DateFormat formatter =
                                   DateFormat('dd-MM-yyyy At hh:mm a');
-                              final String tempDate =
-                                  formatter.format(DateTime.now());
+                              final String tempDate = formatter.format(now);
 
                               Note note = new Note(
                                   value.toString(), tempDate.toString(), 1);
