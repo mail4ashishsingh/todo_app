@@ -44,10 +44,6 @@ class _TodoListScreenState extends State<TodoListScreen>
   }
 
   Widget renderBody() {
-    // for (int i = 0; i < items.length; i++) {
-    //   if (items[i].completed) {}
-    // }
-
     if (items.length > 0) {
       return buildListView();
     } else {

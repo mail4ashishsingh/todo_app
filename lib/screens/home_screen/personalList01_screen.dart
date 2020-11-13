@@ -20,6 +20,7 @@ class _PersonalList01ScreenState extends State<PersonalList01Screen> {
 
   @override
   void initState() {
+    super.initState();
     message = "";
     showContainer = true;
 
@@ -27,8 +28,6 @@ class _PersonalList01ScreenState extends State<PersonalList01Screen> {
     _controller.addListener(_scrollListener);
 
     // _textEditingController.addListener(_printLatestValue);
-
-    super.initState();
   }
 
   @override

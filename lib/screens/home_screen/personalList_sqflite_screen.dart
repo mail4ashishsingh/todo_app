@@ -27,13 +27,13 @@ class _PersonalListSQFLiteScreenState extends State<PersonalListSQFLiteScreen> {
 
   @override
   void initState() {
+    super.initState();
+
     message = "";
     showContainer = false;
 
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
-
-    super.initState();
   }
 
   @override
